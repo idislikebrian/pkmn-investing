@@ -28,7 +28,7 @@
   width: 100%;
 }
 
-.wrapper button {
+.wrapper a {
   border: 2px solid var(--yellow);
   background-color: var(--background);
   cursor: pointer;

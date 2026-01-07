@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import styles from "./Navigation.module.css";
 
 export function Navigation() {
-  const pathname = usePathname();
+  /* const pathname = usePathname();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -15,7 +15,7 @@ export function Navigation() {
 
   if (pathname === "/login" || pathname === "/signup") {
     return null;
-  }
+  } */
 
   const links = [
     { href: "/dashboard", label: "Dashboard" },
@@ -32,15 +32,15 @@ export function Navigation() {
             <h1>Portfolio</h1>
             <div>
               {links.map((link) => (
-                <button key={link.href}>
-                  <Link href={link.href}>{link.label}</Link>
-                </button>
+                <Link key={link.href} href={link.href} className={styles.link}>
+                  {link.label}
+                </Link>
               ))}
             </div>
           </div>
-          <button onClick={handleLogout} className={styles.logoutButton}>
+          {/* <button onClick={handleLogout} className={styles.logoutButton}>
             Logout
-          </button>
+          </button> */}
         </div>
       </div>
     </nav>

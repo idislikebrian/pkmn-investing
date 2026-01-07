@@ -1,14 +1,6 @@
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/session";
 import { Navigation } from "@/components/Navigation";
 
-export default async function DashboardPage() {
-  const user = await getSession();
-
-  if (!user) {
-    redirect("/login");
-  }
-
+export default function DashboardPage() {
   return (
     <div className="page">
       <Navigation />
