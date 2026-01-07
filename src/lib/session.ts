@@ -1,19 +1,24 @@
-import { cookies } from "next/headers"
-import { verifyToken, getUserById, issueMockPrivyToken, type User } from "./auth"
-
-const MOCK_TOKEN = await issueMockPrivyToken()
+import { cookies } from "next/headers";
+import { verifyToken, getUserById, type User } from "./auth";
 
 export async function getSession(): Promise<User | null> {
+  const cookieStore = await cookies();
+
+  // ---- DEV: mock session flow
   if (process.env.NODE_ENV === "development") {
-    return getUserById(JSON.parse(MOCK_TOKEN).userId)
+    const mock = cookieStore.get("mock-session")?.value;
+    if (!mock) return null;
+
+    const { userId } = JSON.parse(mock);
+    return getUserById(userId);
   }
 
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session")?.value
-  if (!token) return null
+  // ---- PROD: real token flow
+  const token = cookieStore.get("session")?.value;
+  if (!token) return null;
 
-  const payload = await verifyToken(token)
-  if (!payload) return null
+  const payload = await verifyToken(token);
+  if (!payload) return null;
 
-  return getUserById(payload.userId)
+  return getUserById(payload.userId);
 }

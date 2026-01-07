@@ -1,13 +1,13 @@
 "use client";
 
+import { mockLogin } from "./actions";
+
 export function ContinueButton() {
   return (
-    <button
-      onClick={() => {
-        window.location.href = "/dashboard";
-      }}
-    >
-      Continue
-    </button>
+    <form action={mockLogin}>
+      <button type="submit">
+        Continue
+      </button>
+    </form>
   );
 }
