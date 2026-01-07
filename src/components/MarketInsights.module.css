@@ -1,0 +1,136 @@
+.dashboard {
+  --black: #111;
+  --white: #fffff8;
+  --red: #e10600;
+  --blue: #2563eb;
+  --yellow: #facc15;
+  --border: rgba(0, 0, 0, 0.15);
+  color: var(--black);
+}
+
+.spaceY4 > * + * {
+  margin-top: 1rem;
+}
+.spaceY6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.grid2 {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .grid2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.rowBetween {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rowGap2 {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.cardHeader {
+  padding: 1rem;
+}
+.cardContent {
+  padding: 1rem;
+}
+
+.cardTitle {
+  font-weight: 600;
+}
+.cardDescription {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.tab {
+  padding: 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+}
+
+.tabActive {
+  background: var(--blue);
+  color: white;
+  border-color: var(--blue);
+}
+
+.badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.badgeDefault {
+  background: var(--red);
+  color: white;
+}
+.badgeSecondary {
+  background: var(--yellow);
+}
+.badgeOutline {
+  border: 1px solid var(--border);
+}
+
+.primaryButton {
+  background: var(--blue);
+  color: white;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+}
+
+.textButton {
+  background: none;
+  border: none;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: grid;
+  place-items: center;
+}
+
+.modalCard {
+  background: var(--white);
+  padding: 1rem;
+  border-radius: 12px;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.tabButton {
+  width: 100%;
+}

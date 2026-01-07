@@ -1,0 +1,75 @@
+.button {
+  appearance: none;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+/* =========================
+   Sizes
+========================= */
+
+.sm {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.md {
+  font-size: 0.875rem;
+  padding: 0.55rem 1rem;
+}
+
+.lg {
+  font-size: 0.95rem;
+  padding: 0.75rem 1.25rem;
+}
+
+/* =========================
+   Variants
+========================= */
+
+.primary {
+  background: var(--blue, #2563eb);
+  color: var(--white, #fffff8);
+  border-color: var(--blue, #2563eb);
+}
+
+.primary:hover {
+  background: #1e4fd8;
+}
+
+.outline {
+  background: transparent;
+  color: var(--black, #111);
+  border-color: rgba(17, 17, 17, 0.2);
+}
+
+.outline:hover {
+  background: rgba(17, 17, 17, 0.05);
+}
+
+.text {
+  background: none;
+  border: none;
+  color: var(--blue, #2563eb);
+  padding: 0;
+}
+
+.text:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   States
+========================= */
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

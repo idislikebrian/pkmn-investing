@@ -1,0 +1,250 @@
+/* =========================
+   Tokens (scoped)
+========================= */
+
+.dashboard {
+  --border: rgba(17, 17, 17, 0.15);
+  --muted: rgba(17, 17, 17, 0.6);
+  --muted-light: rgba(17, 17, 17, 0.4);
+  --radius: 0px;
+
+  color: var(--black);
+  background: var(--white);
+}
+
+/* =========================
+   Layout
+========================= */
+
+.spaceY1 > * + * { margin-top: 0.25rem; }
+.spaceY2 > * + * { margin-top: 0.5rem; }
+.spaceY4 > * + * { margin-top: 1rem; }
+.spaceY6 > * + * { margin-top: 1.5rem; }
+
+.grid {
+  display: grid;
+}
+
+.gridCols2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.gridCols4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.gap2 { gap: 0.5rem; }
+.gap3 { gap: 0.75rem; }
+.gap4 { gap: 1rem; }
+
+@media (min-width: 768px) {
+  .mdGridCols3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.rowBetween {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.centered {
+  text-align: center;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.mlAuto {
+  margin-left: auto;
+}
+
+.pt2 { padding-top: 0.5rem; }
+.pt4 { padding-top: 1rem; }
+.p8 { padding: 2rem; }
+
+/* =========================
+   Typography
+========================= */
+
+.textSm { font-size: 0.875rem; }
+.textXs { font-size: 0.75rem; }
+.textXl { font-size: 1.25rem; }
+.text2xl { font-size: 1.5rem; }
+
+.fontMedium { font-weight: 500; }
+.fontSemibold { font-weight: 600; }
+.fontBold { font-weight: 700; }
+
+.muted {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.mutedSm {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.mutedXs {
+  color: var(--muted-light);
+  font-size: 0.7rem;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.valuePositive {
+  color: var(--blue);
+}
+
+/* =========================
+   Card
+========================= */
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.cardHeader {
+  padding: 1rem 1rem 0.5rem;
+}
+
+.cardContent {
+  padding: 1rem;
+}
+
+.cardTitle {
+  font-weight: 600;
+}
+
+.cardDescription {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.hoverCard {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.hoverCard:hover {
+  box-shadow: 0 6px 20px rgba(17, 17, 17, 0.1);
+  transform: translateY(-1px);
+}
+
+.dividerTop {
+  border-top: 1px solid var(--border);
+}
+
+/* =========================
+   Buttons
+========================= */
+
+.button {
+  appearance: none;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: transparent;
+}
+
+.buttonSm {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.buttonLg {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.95rem;
+}
+
+.buttonPrimary {
+  background: var(--blue);
+  color: var(--white);
+  border-color: var(--blue);
+}
+
+.buttonPrimary:hover {
+  background: #1e4fd8;
+}
+
+.buttonOutline {
+  border-color: var(--border);
+  color: var(--black);
+}
+
+.buttonOutline:hover {
+  background: rgba(17, 17, 17, 0.05);
+}
+
+/* =========================
+   Badge
+========================= */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.badgeLg {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.badgeDefault {
+  background: var(--red);
+  color: var(--white);
+  border-color: var(--red);
+}
+
+.badgeSecondary {
+  background: var(--yellow);
+  color: var(--black);
+  border-color: var(--yellow);
+}
+
+.badgeOutline {
+  background: transparent;
+  color: var(--black);
+  border-color: var(--border);
+}
+
+/* =========================
+   Reasoning list
+========================= */
+
+.reasonItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.bullet {
+  color: var(--blue);
+  line-height: 1;
+}
