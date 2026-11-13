@@ -2,7 +2,7 @@
 
 export interface DexRow {
   line: number; // 1-based line in the file's record order (header = 1)
-  tcg_id: string | null;
+  tcg_id: string;
   name: string;
   set_name: string | null;
   card_number: string | null;
@@ -143,6 +143,12 @@ export function parseDexCsv(bytes: Uint8Array): DexParseResult {
       continue;
     }
 
+    const tcgId = clean(get(rec, "Id"));
+    if (!tcgId) {
+      result.errors.push({ line, name, reason: "missing card Id" });
+      continue;
+    }
+
     const qtyRaw = (get(rec, "Quantity") ?? "").trim();
     if (!/^\d+$/.test(qtyRaw) || Number(qtyRaw) < 1) {
       result.errors.push({ line, name, reason: `invalid quantity "${qtyRaw}" (need an integer >= 1)` });
@@ -162,7 +168,7 @@ export function parseDexCsv(bytes: Uint8Array): DexParseResult {
 
     result.rows.push({
       line,
-      tcg_id: clean(get(rec, "Id")),
+      tcg_id: tcgId,
       name,
       set_name: clean(get(rec, "Set")),
       card_number: clean(get(rec, "Number")),

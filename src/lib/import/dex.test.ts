@@ -67,6 +67,23 @@ describe("parseDexCsv", () => {
     expect(out.rows[0].market_price).toBe(2);
   });
 
+  it("rejects collection rows with an empty or whitespace-only Id", () => {
+    const header =
+      "Type;Category;Locale;Series;Set;Id;Number;Name;Variant;Rarity;Illustrator;Quantity;Price;Note 1;Note 2;Note 3;Note 4;Note 5";
+    const csv = [
+      header,
+      "collection;c;l;s;set;;1;No Id;Normal;r;i;1;$1.00;;;;;",
+      "collection;c;l;s;set;   ;2;Blank Id;Normal;r;i;1;$1.00;;;;;",
+      "collection;c;l;s;set;x-3;3;Has Id;Normal;r;i;1;$1.00;;;;;",
+    ].join("\n");
+    const out = parseDexCsv(new TextEncoder().encode(csv));
+    expect(out.errors).toEqual([
+      { line: 2, name: "No Id", reason: "missing card Id" },
+      { line: 3, name: "Blank Id", reason: "missing card Id" },
+    ]);
+    expect(out.rows.map((r) => r.tcg_id)).toEqual(["x-3"]);
+  });
+
   it("flags a file with the wrong header", () => {
     const out = parseDexCsv(new TextEncoder().encode("a;b\n1;2\n"));
     expect(out.rows).toEqual([]);
