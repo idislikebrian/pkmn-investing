@@ -102,7 +102,9 @@ function calculateGradedValue(currentValue: number, grade: number): number {
   return currentValue * multiplier
 }
 
-function generateReasoning(card: any, estimatedGrade: number, roi: number): string[] {
+type CardPricing = { current_market_price?: number | string | null; set_name?: string | null }
+
+function generateReasoning(card: CardPricing, estimatedGrade: number, roi: number): string[] {
   const reasons: string[] = []
 
   if (estimatedGrade >= 9) {
@@ -113,7 +115,7 @@ function generateReasoning(card: any, estimatedGrade: number, roi: number): stri
     reasons.push("Strong ROI potential based on market analysis")
   }
 
-  if (card.current_market_price > 100) {
+  if (Number(card.current_market_price ?? 0) > 100) {
     reasons.push("High-value card with significant upside when graded")
   }
 
@@ -128,8 +130,8 @@ function generateReasoning(card: any, estimatedGrade: number, roi: number): stri
   return reasons
 }
 
-function calculateMarketDemand(card: any): "high" | "medium" | "low" {
-  if (card.current_market_price > 200) return "high"
-  if (card.current_market_price > 50) return "medium"
+function calculateMarketDemand(card: CardPricing): "high" | "medium" | "low" {
+  if (Number(card.current_market_price ?? 0) > 200) return "high"
+  if (Number(card.current_market_price ?? 0) > 50) return "medium"
   return "low"
 }

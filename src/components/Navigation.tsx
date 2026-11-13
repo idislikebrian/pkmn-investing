@@ -22,6 +22,8 @@ export function Navigation() {
     { href: "/market", label: "Market" },
     { href: "/grading", label: "Grading" },
     { href: "/tax", label: "Tax" },
+    // /import 404s outside development, so don't offer a dead link there.
+    ...(process.env.NODE_ENV === "development" ? [{ href: "/import", label: "Import" }] : []),
   ];
 
   return (

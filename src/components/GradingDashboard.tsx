@@ -126,6 +126,7 @@ export function GradingDashboard() {
               const active = minRoi === value;
               return (
                 <Button
+                  key={value}
                   size="sm"
                   variant={active ? "primary" : "outline"}
                   onClick={() => setMinRoi(value)}
