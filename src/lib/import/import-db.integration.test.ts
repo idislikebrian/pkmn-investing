@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 /**
  * Database-integration tests for the Dex import's persistence contract
@@ -13,8 +13,12 @@ const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
 const d = TEST_DATABASE_URL ? describe : describe.skip;
 
 d("importDexRows (integration, disposable DB required)", () => {
-  // Point the action's own Pool at the disposable database.
-  process.env.DATABASE_URL = TEST_DATABASE_URL;
+  // Point the action's own Pool at the disposable database — but only when the suite
+  // actually runs. An assignment at collection time would clobber a developer's real
+  // DATABASE_URL with undefined even while the suite is skipped.
+  beforeAll(() => {
+    if (TEST_DATABASE_URL) process.env.DATABASE_URL = TEST_DATABASE_URL;
+  });
 
   it.skipIf(!TEST_DATABASE_URL)("persists rows scoped to the session's claimed user", async () => {
     const { importDexRows } = await import("@/app/import/actions");

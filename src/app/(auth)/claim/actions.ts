@@ -90,7 +90,10 @@ export async function claimOwnership(token: string): Promise<{ ok: boolean; mess
     return { ok: true, message: "Owner account claimed. The Dex import is now scoped to you." };
   } catch (err) {
     await client.query("ROLLBACK");
-    return { ok: false, message: `Claim failed: ${(err as Error).message}` };
+    // Detailed error stays server-side only; the raw message could leak internal
+    // detail (SQL text, constraint names, connection strings) to the browser.
+    console.error("claimOwnership failed:", err);
+    return { ok: false, message: "Claim could not be completed. Request a new claim link." };
   } finally {
     client.release();
     await pool.end();
