@@ -39,7 +39,30 @@ const ROWS = [
 ];
 
 function sessionOf(id: string) {
-  return { user: { id, name: "x", email: "x@example.com" }, session: { token: "tok" } };
+  // Full Better Auth session shape (AppSession = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>);
+  // a partial mock previously tripped tsc TS2345 in the three mockResolvedValue calls below.
+  const now = new Date();
+  return {
+    user: {
+      id,
+      name: "x",
+      email: "x@example.com",
+      emailVerified: false,
+      image: null,
+      createdAt: now,
+      updatedAt: now,
+    },
+    session: {
+      id: `sess-${id}`,
+      userId: id,
+      token: "tok",
+      expiresAt: new Date(now.getTime() + 86_400_000),
+      createdAt: now,
+      updatedAt: now,
+      ipAddress: null,
+      userAgent: null,
+    },
+  };
 }
 
 function makeFakeClient(boundUserId: number | null) {
