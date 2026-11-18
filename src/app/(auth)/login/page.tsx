@@ -1,12 +1,12 @@
 import { Navigation } from "@/components/Navigation";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { ContinueButton } from "./continue-button";
+import { LoginForm } from "./login-form";
 
 export default async function LoginPage() {
-  const user = await getSession();
+  const session = await getSession();
 
-  if (user) {
+  if (session) {
     redirect("/dashboard");
   }
 
@@ -15,9 +15,9 @@ export default async function LoginPage() {
       <Navigation />
       <main className="main">
         <h1>Login</h1>
-        <p>Placeholder auth. Real login coming soon.</p>
+        <p>Sign in with your email and password.</p>
 
-        <ContinueButton />
+        <LoginForm />
       </main>
     </div>
   );
