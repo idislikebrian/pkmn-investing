@@ -56,7 +56,9 @@ export async function importDexRows(input: { rows: DexRow[]; skipped: DexIssue[]
   // Checked on the server so hiding the UI is not the only protection (COB-812):
   // requires an authenticated session, and stays closed outside development until
   // end-to-end verification (IMPORT_E2E_VERIFIED=1 set by the operator; COB-798).
-  const access = await importAccess();
+  // Resolved once here and shared with importAccess + ownership below.
+  const session = await getSession();
+  const access = await importAccess(session);
   if (!access.allowed) {
     throw new Error(
       access.reason === "unauthenticated"
@@ -83,7 +85,7 @@ export async function importDexRows(input: { rows: DexRow[]; skipped: DexIssue[]
   try {
     await client.query("BEGIN");
     // Session-derived ownership: never auto-inserts, never auto-binds (COB-812).
-    const session = await getSession();
+    // Uses the session resolved at the top of this action.
     const userId = await getOwnerUserId(client, session?.user.id ?? null);
     let inserted = 0;
     let updated = 0;

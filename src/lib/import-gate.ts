@@ -1,4 +1,4 @@
-import { getSession } from "./session";
+import { getSession, type AppSession } from "./session";
 
 /**
  * Import gate (COB-812, preserving COB-798's "stays gated until end-to-end verified").
@@ -13,9 +13,13 @@ export type ImportAccess =
   | { allowed: true }
   | { allowed: false; reason: "unauthenticated" | "gated-pending-verification" };
 
-export async function importAccess(): Promise<ImportAccess> {
-  const session = await getSession();
-  if (!session) return { allowed: false, reason: "unauthenticated" };
+/**
+ * Pass a session resolved by the caller to avoid resolving it twice per request
+ * (e.g. importDexRows needs the same session for ownership). Omitted => resolved here.
+ */
+export async function importAccess(session?: AppSession | null): Promise<ImportAccess> {
+  const s = session === undefined ? await getSession() : session;
+  if (!s) return { allowed: false, reason: "unauthenticated" };
   if (process.env.NODE_ENV === "development") return { allowed: true };
   if (process.env.IMPORT_E2E_VERIFIED === "1") return { allowed: true };
   return { allowed: false, reason: "gated-pending-verification" };

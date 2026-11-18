@@ -8,7 +8,9 @@ import type { PoolClient } from "@neondatabase/serverless";
  * to a `users` row via `users.better_auth_user_id` — which only the claim flow
  * (src/app/(auth)/claim) can do, and only with an operator-issued claim token.
  *
- * Never auto-inserts, never auto-binds: an unclaimed or unknown session user gets null.
+ * Never auto-inserts, never auto-binds: an unclaimed or unknown session user is rejected.
+ * Throwing contract: resolves with the claimed users.id, or throws OwnershipNotClaimedError
+ * (never resolves to null).
  */
 export class OwnershipNotClaimedError extends Error {
   constructor() {
@@ -22,7 +24,8 @@ export class OwnershipNotClaimedError extends Error {
 export async function getOwnerUserId(
   client: Pick<PoolClient, "query">,
   betterAuthUserId: string | null,
-): Promise<number | null> {
+): Promise<number> {
+  // Throws OwnershipNotClaimedError instead of returning null (see contract above).
   if (!betterAuthUserId) throw new OwnershipNotClaimedError();
 
   const res = await client.query<{ id: number }>(
