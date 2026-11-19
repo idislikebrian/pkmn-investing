@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 /**
  * Database-integration tests for the Dex import's persistence contract
@@ -12,12 +12,44 @@ import { beforeAll, describe, expect, it } from "vitest";
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
 const d = TEST_DATABASE_URL ? describe : describe.skip;
 
+// The action resolves its session via getSession(); outside a Next request context that
+// returns null, so the integration suite mocks the signed-in owner session (the synthetic
+// Better Auth user bound to the legacy owner row during COB-812 verification). Without
+// this mock the gate correctly denies the import before touching the DB.
+vi.mock("@/lib/session", () => ({ getSession: vi.fn() }));
+
+import { getSession } from "@/lib/session";
+
+let baUserId = "";
+
+const TEST_DATABASE_URL_VALUE = TEST_DATABASE_URL;
+
 d("importDexRows (integration, disposable DB required)", () => {
   // Point the action's own Pool at the disposable database — but only when the suite
   // actually runs. An assignment at collection time would clobber a developer's real
   // DATABASE_URL with undefined even while the suite is skipped.
-  beforeAll(() => {
-    if (TEST_DATABASE_URL) process.env.DATABASE_URL = TEST_DATABASE_URL;
+  beforeAll(async () => {
+    if (!TEST_DATABASE_URL) return;
+    process.env.DATABASE_URL = TEST_DATABASE_URL;
+    const { Pool } = await import("@neondatabase/serverless");
+    // Repeatability: clear this suite's own synthetic rows (int-*) so re-runs start clean.
+    // price_snapshots rows cascade via the cards FK. Scoped to the int- prefix only.
+    const cleanup = new Pool({ connectionString: TEST_DATABASE_URL });
+    try {
+      await cleanup.query("DELETE FROM cards WHERE tcg_id LIKE 'int-%'");
+    } finally {
+      await cleanup.end();
+    }
+    // Bind the mocked session to the synthetic Better Auth user claimed against the
+    // legacy owner row during COB-812 verification.
+    const c = new Pool({ connectionString: TEST_DATABASE_URL });
+    try {
+      const r = await c.query("SELECT id FROM better_auth_user WHERE email = $1", ["synthetic-owner+it@example.com"]);
+      baUserId = r.rows[0].id;
+    } finally {
+      await c.end();
+    }
+    vi.mocked(getSession).mockResolvedValue({ user: { id: baUserId } } as never);
   });
 
   it.skipIf(!TEST_DATABASE_URL)("persists rows scoped to the session's claimed user", async () => {
