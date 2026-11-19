@@ -82,8 +82,14 @@ CREATE TABLE IF NOT EXISTS owner_claims (
 --   owner a fresh single-use claim token; the owner can then re-sign-up with a new password and
 --   re-claim the legacy row (the old claim is invalidated by rotating the token row).
 -- - Losing access to the owner's email entirely: the operator deletes the stale
---   better_auth_user/better_auth_account rows (operator-side SQL), issues a new claim token,
---   and the fresh signup reclaims users.better_auth_user_id.
+--   better_auth_user/better_auth_account rows (operator-side SQL). NOTE: users.better_auth_user_id
+--   is TEXT UNIQUE with NO foreign key, so deleting the Better Auth rows does NOT clear the
+--   binding — the stale value survives on the users row, and a re-claim against it fails closed
+--   with "This owner row is already claimed". The operator MUST clear it explicitly before
+--   issuing the new claim token:
+--       UPDATE users SET better_auth_user_id = NULL WHERE id = <row_id>;
+--   Then issue a new claim token (scripts/generate-owner-claim.mjs) and the fresh signup
+--   re-claims users.better_auth_user_id.
 
 -- ---- ROLLBACK (uncomment to revert manually; schema_migrations row for this file must also
 -- ---- be deleted or the migrator will consider it applied):

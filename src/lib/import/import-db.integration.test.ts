@@ -8,14 +8,20 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
  * (a disposable database you own — deliberately NOT the production DATABASE_URL). COB-812
  * runs without any database access, so they skip; run them locally with:
  *   TEST_DATABASE_URL=postgres://... npm run test -- import-db.integration
+ *
+ * SELF-CONTAINED SETUP: beforeAll seeds its own synthetic Better Auth user ('synthetic-test-user')
+ * and binds a synthetic legacy users row to it via direct SQL, so the suite needs no out-of-band
+ * rehearsal state and passes on a fresh disposable database. All data is synthetic; the seeded
+ * identity rows are idempotent (ON CONFLICT DO NOTHING + rebinding UPDATE), and the int-* card
+ * cleanup keeps re-runs deterministic.
  */
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
 const d = TEST_DATABASE_URL ? describe : describe.skip;
 
 // The action resolves its session via getSession(); outside a Next request context that
 // returns null, so the integration suite mocks the signed-in owner session (the synthetic
-// Better Auth user bound to the legacy owner row during COB-812 verification). Without
-// this mock the gate correctly denies the import before touching the DB.
+// Better Auth user seeded and bound in beforeAll below). Without this mock the gate correctly
+// denies the import before touching the DB.
 vi.mock("@/lib/session", () => ({ getSession: vi.fn() }));
 
 import { getSession } from "@/lib/session";
@@ -40,11 +46,33 @@ d("importDexRows (integration, disposable DB required)", () => {
     } finally {
       await cleanup.end();
     }
-    // Bind the mocked session to the synthetic Better Auth user claimed against the
-    // legacy owner row during COB-812 verification.
+    // Seed the synthetic Better Auth user and the legacy-row binding directly, so the suite is
+    // self-contained on a fresh disposable DB (no out-of-band rehearsal state required).
+    // Synthetic data only; idempotent for re-runs against a reused database.
+    const seed = new Pool({ connectionString: TEST_DATABASE_URL });
+    try {
+      await seed.query(
+        `INSERT INTO better_auth_user (id, name, email, "emailVerified", "createdAt", "updatedAt")
+         VALUES ('synthetic-test-user', 'Integration Test', 'int-test@synthetic.local', false, now(), now())
+         ON CONFLICT DO NOTHING`,
+      );
+      // Synthetic legacy owner row; if it already exists (re-run), just (re)bind it.
+      await seed.query(
+        `INSERT INTO users (privy_id, email)
+         VALUES ('synthetic-it-owner', 'int-test-owner@synthetic.local')
+         ON CONFLICT (privy_id) DO NOTHING`,
+      );
+      await seed.query(
+        `UPDATE users SET better_auth_user_id = 'synthetic-test-user' WHERE privy_id = 'synthetic-it-owner'`,
+      );
+    } finally {
+      await seed.end();
+    }
+    // Bind the mocked session to the seeded synthetic Better Auth user.
     const c = new Pool({ connectionString: TEST_DATABASE_URL });
     try {
-      const r = await c.query("SELECT id FROM better_auth_user WHERE email = $1", ["synthetic-owner+it@example.com"]);
+      const r = await c.query("SELECT id FROM better_auth_user WHERE email = $1", ["int-test@synthetic.local"]);
+      if (r.rows.length === 0) throw new Error("Seeding failed: synthetic Better Auth user not found");
       baUserId = r.rows[0].id;
     } finally {
       await c.end();
