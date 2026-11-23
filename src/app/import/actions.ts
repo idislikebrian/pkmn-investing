@@ -1,6 +1,8 @@
 "use server";
 
 import { Pool } from "@neondatabase/serverless";
+import { importAccess } from "@/lib/import-gate";
+import { getSession } from "@/lib/session";
 import { getOwnerUserId } from "@/lib/owner";
 import type { DexIssue, DexRow } from "@/lib/import/dex";
 
@@ -51,9 +53,18 @@ const UPSERT = `
 `;
 
 export async function importDexRows(input: { rows: DexRow[]; skipped: DexIssue[] }): Promise<ImportResult> {
-  // Checked on the server so hiding the UI is not the only protection.
-  if (process.env.NODE_ENV !== "development") {
-    throw new Error("Import is only available in development.");
+  // Checked on the server so hiding the UI is not the only protection (COB-812):
+  // requires an authenticated session, and stays closed outside development until
+  // end-to-end verification (IMPORT_E2E_VERIFIED=1 set by the operator; COB-798).
+  // Resolved once here and shared with importAccess + ownership below.
+  const session = await getSession();
+  const access = await importAccess(session);
+  if (!access.allowed) {
+    throw new Error(
+      access.reason === "unauthenticated"
+        ? "Sign in to import."
+        : "Import is closed until end-to-end verification.",
+    );
   }
 
   const skipped: DexIssue[] = [...input.skipped];
@@ -73,7 +84,9 @@ export async function importDexRows(input: { rows: DexRow[]; skipped: DexIssue[]
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    const userId = await getOwnerUserId(client);
+    // Session-derived ownership: never auto-inserts, never auto-binds (COB-812).
+    // Uses the session resolved at the top of this action.
+    const userId = await getOwnerUserId(client, session?.user.id ?? null);
     let inserted = 0;
     let updated = 0;
 

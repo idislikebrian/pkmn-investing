@@ -1,24 +1,21 @@
-import { cookies } from "next/headers";
-import { verifyToken, getUserById, type User } from "./auth";
+import { headers } from "next/headers";
+import { auth } from "./better-auth";
 
-export async function getSession(): Promise<User | null> {
-  const cookieStore = await cookies();
+/** The `{ user, session }` payload Better Auth's getSession API returns. */
+export type AppSession = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
 
-  // ---- DEV: mock session flow
-  if (process.env.NODE_ENV === "development") {
-    const mock = cookieStore.get("mock-session")?.value;
-    if (!mock) return null;
-
-    const { userId } = JSON.parse(mock);
-    return getUserById(userId);
+/**
+ * Resolves the current Better Auth session from the request cookies.
+ * Single code path for every caller. Missing, malformed, expired or otherwise
+ * invalid cookies resolve to null — this never throws.
+ */
+export async function getSession(): Promise<AppSession | null> {
+  try {
+    const hdrs = await headers();
+    const session = await auth.api.getSession({ headers: hdrs });
+    return session ?? null;
+  } catch {
+    // Malformed/unsigned cookie or any internal failure must read as "no session".
+    return null;
   }
-
-  // ---- PROD: real token flow
-  const token = cookieStore.get("session")?.value;
-  if (!token) return null;
-
-  const payload = await verifyToken(token);
-  if (!payload) return null;
-
-  return getUserById(payload.userId);
 }
