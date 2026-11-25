@@ -31,7 +31,7 @@ export default async function DashboardPage({
   try {
     let data;
     try {
-      const ownerId = await getOwnerUserId(client, session.user.id);
+      const ownerId = await getOwnerUserId(client, session.user.id, session.user.email);
       data = await getDashboardData(client, ownerId);
     } catch (error) {
       if (error instanceof OwnershipNotClaimedError) {
@@ -41,8 +41,8 @@ export default async function DashboardPage({
             <main className="main">
               <section className={styles.dashboard}>
                 <div className={styles.empty}>
-                  <h1>No collection is linked to this account yet</h1>
-                  <p>Sign in with an account that has an approved collection claim.</p>
+                  <h1>Your collection is empty</h1>
+                  <p><a href="/import">Import a Dex export</a> to get started.</p>
                 </div>
               </section>
             </main>

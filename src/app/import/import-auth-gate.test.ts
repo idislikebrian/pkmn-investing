@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  * The Dex contract itself is covered by src/lib/import/dex.test.ts; here we pin that the
  * action (a) denies unauthenticated calls before ANY database object is constructed,
  * (b) stays closed when gated pending verification, (c) resolves ownership explicitly
- * from the session (no auto-bind), and (d) rolls back when the session is unclaimed.
+ * from the session (creating only its own row when needed), and (d) rolls back on failure.
  */
 vi.mock("@/lib/session", () => ({ getSession: vi.fn() }));
 
@@ -17,7 +17,6 @@ vi.mock("@neondatabase/serverless", () => ({
 import { Pool } from "@neondatabase/serverless";
 import { getSession } from "@/lib/session";
 import { importDexRows } from "./actions";
-import { OwnershipNotClaimedError } from "@/lib/owner";
 
 const ROWS = [
   {
@@ -77,6 +76,9 @@ function makeFakeClient(boundUserId: number | null) {
       calls.push({ sql, params });
       if (sql.startsWith("SELECT id FROM users WHERE better_auth_user_id")) {
         return { rows: boundUserId === null ? [] : [{ id: boundUserId }], rowCount: boundUserId === null ? 0 : 1 };
+      }
+      if (sql.startsWith("INSERT INTO users")) {
+        return { rows: [{ id: boundUserId ?? 7 }], rowCount: 1 };
       }
       if (sql.includes("INSERT INTO cards")) {
         return { rows: [{ id: 101, inserted: true }], rowCount: 1 };
@@ -159,7 +161,7 @@ describe("importDexRows authentication gate", () => {
     expect(fake.client.ended).toBe(true);
   });
 
-  it("unclaimed session -> ownership error, rolled back, no card writes", async () => {
+  it("unbound session gets an isolated owner row before card writes", async () => {
     vi.stubEnv("NODE_ENV", "development");
     vi.mocked(getSession).mockResolvedValue(sessionOf("ba-nobody"));
     const fake = makeFakeClient(null);
@@ -173,10 +175,9 @@ describe("importDexRows authentication gate", () => {
         }) as never,
     );
 
-    await expect(importDexRows({ rows: ROWS, skipped: [] })).rejects.toBeInstanceOf(
-      OwnershipNotClaimedError,
-    );
-    expect(fake.calls.some((c) => c.sql === "ROLLBACK")).toBe(true);
-    expect(fake.calls.some((c) => c.sql.includes("INSERT INTO cards"))).toBe(false);
+    const result = await importDexRows({ rows: ROWS, skipped: [] });
+    expect(result.inserted).toBe(1);
+    expect(fake.calls.some((c) => c.sql.startsWith("INSERT INTO users"))).toBe(true);
+    expect(fake.calls.find((c) => c.sql.includes("INSERT INTO cards"))?.params?.[0]).toBe(7);
   });
 });

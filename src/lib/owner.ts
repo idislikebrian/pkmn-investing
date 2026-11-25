@@ -8,9 +8,10 @@ import type { PoolClient } from "@neondatabase/serverless";
  * to a `users` row via `users.better_auth_user_id` — which only the claim flow
  * (src/app/(auth)/claim) can do, and only with an operator-issued claim token.
  *
- * Never auto-inserts, never auto-binds: an unclaimed or unknown session user is rejected.
- * Throwing contract: resolves with the claimed users.id, or throws OwnershipNotClaimedError
- * (never resolves to null).
+ * A session without a bound row gets a fresh row. Existing unclaimed legacy rows are never
+ * adopted; the INSERT only binds the new row to this Better Auth identity.
+ * Throwing contract: resolves with the session's users.id, or throws OwnershipNotClaimedError
+ * when there is no authenticated identity or a concurrent insert cannot be read back.
  */
 export class OwnershipNotClaimedError extends Error {
   constructor() {
@@ -24,14 +25,29 @@ export class OwnershipNotClaimedError extends Error {
 export async function getOwnerUserId(
   client: Pick<PoolClient, "query">,
   betterAuthUserId: string | null,
+  email?: string | null,
 ): Promise<number> {
-  // Throws OwnershipNotClaimedError instead of returning null (see contract above).
   if (!betterAuthUserId) throw new OwnershipNotClaimedError();
 
-  const res = await client.query<{ id: number }>(
+  const existing = await client.query<{ id: number }>(
     "SELECT id FROM users WHERE better_auth_user_id = $1",
     [betterAuthUserId],
   );
-  if (res.rows.length === 0) throw new OwnershipNotClaimedError();
-  return res.rows[0].id;
+  if (existing.rows.length > 0) return existing.rows[0].id;
+
+  const inserted = await client.query<{ id: number }>(
+    `INSERT INTO users (better_auth_user_id, email)
+     VALUES ($1, $2)
+     ON CONFLICT (better_auth_user_id) DO NOTHING
+     RETURNING id`,
+    [betterAuthUserId, email ?? null],
+  );
+  if (inserted.rows.length > 0) return inserted.rows[0].id;
+
+  const raced = await client.query<{ id: number }>(
+    "SELECT id FROM users WHERE better_auth_user_id = $1",
+    [betterAuthUserId],
+  );
+  if (raced.rows.length > 0) return raced.rows[0].id;
+  throw new OwnershipNotClaimedError();
 }
