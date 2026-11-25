@@ -84,9 +84,8 @@ export async function importDexRows(input: { rows: DexRow[]; skipped: DexIssue[]
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    // Session-derived ownership: never auto-inserts, never auto-binds (COB-812).
-    // Uses the session resolved at the top of this action.
-    const userId = await getOwnerUserId(client, session?.user.id ?? null);
+    // Resolve or lazily create only this session's owner row.
+    const userId = await getOwnerUserId(client, session?.user.id ?? null, session?.user.email);
     let inserted = 0;
     let updated = 0;
 

@@ -7,7 +7,11 @@ import { getDashboardData, sortDashboardCards, type DashboardSort } from "@/lib/
 import styles from "./dashboard.module.css";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-const dateTime = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" });
+const dateTime = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "America/New_York",
+});
 
 function sortFromParam(value: string | string[] | undefined): DashboardSort {
   const sort = Array.isArray(value) ? value[0] : value;
@@ -31,7 +35,7 @@ export default async function DashboardPage({
   try {
     let data;
     try {
-      const ownerId = await getOwnerUserId(client, session.user.id);
+      const ownerId = await getOwnerUserId(client, session.user.id, session.user.email);
       data = await getDashboardData(client, ownerId);
     } catch (error) {
       if (error instanceof OwnershipNotClaimedError) {
@@ -41,8 +45,8 @@ export default async function DashboardPage({
             <main className="main">
               <section className={styles.dashboard}>
                 <div className={styles.empty}>
-                  <h1>No collection is linked to this account yet</h1>
-                  <p>Sign in with an account that has an approved collection claim.</p>
+                  <h1>Your collection is empty</h1>
+                  <p><a href="/import">Import a Dex export</a> to get started.</p>
                 </div>
               </section>
             </main>

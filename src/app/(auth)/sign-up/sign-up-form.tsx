@@ -23,9 +23,9 @@ export function SignUpForm() {
             setError(error.message ?? "Sign-up failed.");
             return;
           }
-          // New accounts start UNCLAIMED: card data stays untouched until the
-          // operator-issued claim token is redeemed at /claim.
-          window.location.href = "/claim";
+          // The dashboard lazily creates this account's empty collection. Existing
+          // legacy collection binding remains exclusive to /claim.
+          window.location.href = "/dashboard";
         } catch {
           setError("Sign-up failed.");
         } finally {
