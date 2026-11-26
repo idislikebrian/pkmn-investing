@@ -10,6 +10,7 @@
 
   color: var(--black);
   background: var(--white);
+  min-width: 0;
 }
 
 /* =========================
@@ -46,6 +47,7 @@
 .row {
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .rowBetween {
@@ -150,6 +152,12 @@
 
 .dividerTop {
   border-top: 1px solid var(--border);
+}
+
+@media (max-width: 520px) {
+  .cardHeader, .cardContent { padding: .75rem; }
+  .rowBetween { align-items: flex-start; gap: .75rem; }
+  .row { flex-wrap: wrap; }
 }
 
 /* =========================

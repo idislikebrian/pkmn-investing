@@ -73,7 +73,7 @@ export default async function DashboardPage({
             </header>
 
             <section className={styles.stats} aria-label="Collection summary">
-              <div className={styles.stat}><span className={styles.statLabel}>Collection value</span><strong className={styles.statValue}>{money.format(data.totalValue)}</strong></div>
+              <div className={styles.stat}><span className={styles.statLabel}>Collection value</span><strong className={styles.statValue}>{data.totalValue === null ? "unavailable" : money.format(data.totalValue)}</strong></div>
               <div className={styles.stat}><span className={styles.statLabel}>Total cards</span><strong className={styles.statValue}>{data.totalQuantity.toLocaleString()}</strong></div>
               <div className={styles.stat}><span className={styles.statLabel}>Unique cards</span><strong className={styles.statValue}>{data.uniqueCards.toLocaleString()}</strong></div>
               <div className={styles.stat}><span className={styles.statLabel}>Prices updated</span><strong className={styles.statValue}>{data.lastPriceUpdate ? dateTime.format(new Date(data.lastPriceUpdate)) : "never"}</strong></div>
@@ -87,7 +87,7 @@ export default async function DashboardPage({
                     <span className={styles.rank}>0{index + 1}</span>
                     <strong className={styles.cardName}>{card.name}</strong>
                     <span className={styles.cardMeta}>{card.setName ?? "Unknown set"} · {card.cardNumber ?? "—"}</span>
-                    <span className={styles.cardValue}>{money.format(card.lineValue)}</span>
+                    <span className={styles.cardValue}>{card.lineValue === null ? "unavailable" : money.format(card.lineValue)}</span>
                   </article>
                 ))}
               </div>
@@ -108,7 +108,7 @@ export default async function DashboardPage({
                   <tbody>
                     {cards.map((card) => (
                       <tr key={card.id}>
-                        <td>{card.name}</td><td>{card.setName ?? "—"}</td><td>{card.cardNumber ?? "—"}</td><td>{card.variant ?? "—"}</td><td>{card.rarity ?? "—"}</td><td className={styles.number}>{card.quantity}</td><td className={styles.number}>{price(card.unitPrice)}</td><td className={styles.number}>{money.format(card.lineValue)}</td>
+                        <td>{card.name}</td><td>{card.setName ?? "—"}</td><td>{card.cardNumber ?? "—"}</td><td>{card.variant ?? "—"}</td><td>{card.rarity ?? "—"}</td><td className={styles.number}>{card.quantity}</td><td className={styles.number}>{price(card.unitPrice)}</td><td className={styles.number}>{card.lineValue === null ? "unavailable" : money.format(card.lineValue)}</td>
                       </tr>
                     ))}
                   </tbody>

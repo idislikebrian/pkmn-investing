@@ -52,6 +52,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
 /* -----------------------------
@@ -83,5 +84,6 @@ body {
   width: 100%;
   flex-direction: column;
   align-items: flex-start;
-  padding: 120px 60px;
+  min-width: 0;
+  padding: 7.5rem clamp(16px, 4vw, 60px) 3rem;
 }

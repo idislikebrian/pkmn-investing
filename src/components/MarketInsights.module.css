@@ -6,6 +6,7 @@
   --yellow: #facc15;
   --border: rgba(0, 0, 0, 0.15);
   color: var(--black);
+  min-width: 0;
 }
 
 .spaceY4 > * + * {
@@ -59,16 +60,24 @@
 }
 
 .tabs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  max-width: 100%;
   gap: 0.5rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding-bottom: 0.15rem;
 }
 
 .tab {
+  flex: 0 0 auto;
   padding: 0.6rem;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: transparent;
+}
+
+@media (max-width: 520px) {
+  .cardHeader, .cardContent { padding: .75rem; }
 }
 
 .tabActive {

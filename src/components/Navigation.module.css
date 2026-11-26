@@ -1,17 +1,21 @@
 .nav {
   display: flex;
   height: 4rem;
-  padding: 0 1.5rem;
-  width: 100vw;
+  padding: 0;
+  width: 100%;
   top: 0;
   position: fixed;
   z-index: 100;
+  background: color-mix(in srgb, var(--background) 94%, transparent);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--black) 8%, transparent);
 }
 
 .container {
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 clamp(12px, 4vw, 60px);
   width: 100%;
+  min-width: 0;
 }
 
 .container a {
@@ -26,6 +30,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  min-width: 0;
 }
 
 .wrapper a {
@@ -35,6 +40,25 @@
   padding: 1rem 1.5rem;
   border-radius: 50px;
   transition: background-color 0.2s;
+}
+
+.navLinks {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  padding-bottom: 0.15rem;
+}
+
+@media (max-width: 520px) {
+  .nav { height: auto; min-height: 4rem; }
+  .wrapper { align-items: flex-start; gap: 0.5rem; padding: 0.5rem 0; }
+  .wrapper h1 { margin: 0 0 0.25rem; font-size: 1.25rem; }
+  .container a { font-size: 0.875rem; }
+  .wrapper a { padding: 0.25rem 0.4rem; border-width: 1px; border-radius: 0; }
 }
 
 .logoutButton {
