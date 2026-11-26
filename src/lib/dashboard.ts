@@ -11,7 +11,7 @@ export type DashboardCard = {
   rarity: string | null;
   quantity: number;
   unitPrice: number | null;
-  lineValue: number;
+  lineValue: number | null;
   priceUpdatedAt: string | null;
 };
 
@@ -29,7 +29,7 @@ type CardRow = {
 
 export type DashboardData = {
   cards: DashboardCard[];
-  totalValue: number;
+  totalValue: number | null;
   totalQuantity: number;
   uniqueCards: number;
   lastPriceUpdate: string | null;
@@ -53,7 +53,7 @@ export function mapDashboardCard(row: CardRow): DashboardCard {
     rarity: row.rarity,
     quantity,
     unitPrice,
-    lineValue: quantity * (unitPrice ?? 0),
+    lineValue: unitPrice === null ? null : quantity * unitPrice,
     priceUpdatedAt: row.price_updated_at ? new Date(row.price_updated_at).toISOString() : null,
   };
 }
@@ -62,13 +62,15 @@ export function sortDashboardCards(cards: DashboardCard[], sort: DashboardSort):
   return [...cards].sort((a, b) => {
     if (sort === "name") return a.name.localeCompare(b.name) || a.id - b.id;
     if (sort === "set") return (a.setName ?? "").localeCompare(b.setName ?? "") || a.name.localeCompare(b.name) || a.id - b.id;
-    return b.lineValue - a.lineValue || a.name.localeCompare(b.name) || a.id - b.id;
+    return (b.lineValue ?? -Infinity) - (a.lineValue ?? -Infinity) || a.name.localeCompare(b.name) || a.id - b.id;
   });
 }
 
 export function summarizeDashboardCards(cards: DashboardCard[]) {
   return {
-    totalValue: cards.reduce((sum, card) => sum + card.lineValue, 0),
+    totalValue: cards.every((card) => card.lineValue !== null)
+      ? cards.reduce((sum, card) => sum + (card.lineValue ?? 0), 0)
+      : null,
     totalQuantity: cards.reduce((sum, card) => sum + card.quantity, 0),
     uniqueCards: cards.length,
     lastPriceUpdate: cards.reduce<string | null>((latest, card) => {

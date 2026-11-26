@@ -32,5 +32,5 @@
   .stats, .topCards { grid-template-columns: 1fr; }
   .sectionHeading { align-items: flex-start; flex-direction: column; gap: .5rem; }
   .sortLinks { width: 100%; }
-  .stat, .topCard { padding: 1rem; }
+  .stat, .topCard { min-height: auto; padding: .75rem; }
 }

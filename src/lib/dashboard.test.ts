@@ -8,8 +8,8 @@ const cards = [
 ];
 
 describe("dashboard data", () => {
-  it("calculates totals and treats missing prices as zero", () => {
-    expect(summarizeDashboardCards(cards)).toEqual({ totalValue: 498.56, totalQuantity: 6, uniqueCards: 3, lastPriceUpdate: "2026-11-25T10:00:00.000Z" });
+  it("marks portfolio value unavailable when any card lacks a price", () => {
+    expect(summarizeDashboardCards(cards)).toEqual({ totalValue: null, totalQuantity: 6, uniqueCards: 3, lastPriceUpdate: "2026-11-25T10:00:00.000Z" });
   });
 
   it("sorts by value, name, and set without mutating the input", () => {
